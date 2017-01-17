@@ -16,5 +16,14 @@ namespace Artifact_Tool
         {
             InitializeComponent();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.ShowDialog();
+            string chosenFile = openFileDialog1.FileName;
+            MessageBox.Show("Your file is " + chosenFile);
+
+
+        }
     }
 }
