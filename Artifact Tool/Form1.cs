@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Reflection;
 using Microsoft.Office.Interop.Excel;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Linq.Expressions;
+using System.IO;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace Artifact_Tool
 {
@@ -34,8 +34,10 @@ namespace Artifact_Tool
             xlWorksheet.ListObjects.AddEx(XlListObjectSourceType.xlSrcRange, xlRange, Type.Missing,
                 XlYesNoGuess.xlYes).Name = "WFTableStyle";
 
-            xlWorksheet.ListObjects.get_Item("WFTableStyle").TableStyle = "TableStyleMedium16";
-            
+            xlWorksheet.ListObjects.get_Item("WFTableStyle").TableStyle = "TableStyleLight8";
+            xlRange.WrapText = true;
+            xlWorksheet.Columns.AutoFit();
+
 
             int rowCount = xlRange.Rows.Count;
             int colCount = xlRange.Columns.Count;
@@ -114,11 +116,11 @@ namespace Artifact_Tool
                 else if(dateOnly >= pStart && dateOnly >= pFinish)
                 {
                     // Color the Planned Finish cell red
-                    page.Cells[currentRow, 14].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                    page.Cells[currentRow, 14].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
 
                     // If actual start is not greater or equal to planned start or empty then...
                     if (item.GetValue(1, 4) != null)
-                        if(item.GetValue(1, 4).ToString() == "" || item.GetValue(1, 8).ToString() == null)
+                        if(item.GetValue(1, 4).ToString() != "" || item.GetValue(1, 8).ToString() == null)
                     {
                         // Color the actual start cell red
                         page.Cells[currentRow, 4].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGreen);
@@ -126,7 +128,7 @@ namespace Artifact_Tool
                     else
                         {
                             // Color the actual start cell red
-                            page.Cells[currentRow, 4].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                            page.Cells[currentRow, 4].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                         }
 
                     // If actual finish is empty or is less or equal to todays date then ...
@@ -139,7 +141,7 @@ namespace Artifact_Tool
                     else
                     {
                         // Color the actual finish cell red
-                        page.Cells[currentRow, 3].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                        page.Cells[currentRow, 3].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                     }
 
                     // If Estimated Coding is empty then ... 
@@ -152,7 +154,7 @@ namespace Artifact_Tool
                     else
                         {
                             // Color the estimated coding cell red
-                            page.Cells[currentRow, 11].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                            page.Cells[currentRow, 11].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                         }
 
                     // If Estimated Design is empty then ...
@@ -165,7 +167,7 @@ namespace Artifact_Tool
                     else
                         {
                             // Color the estimated design cell red
-                            page.Cells[currentRow, 12].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                            page.Cells[currentRow, 12].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                         }
 
                     // if Actual Coding is empty then ...
@@ -177,7 +179,7 @@ namespace Artifact_Tool
                     }
                     else
                     {
-                        page.Cells[currentRow, 1].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                        page.Cells[currentRow, 1].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                     }
 
                     // if Actual Design is empty then ...
@@ -190,23 +192,29 @@ namespace Artifact_Tool
                     else
                     {
                         // Color the actual design cell red
-                        page.Cells[currentRow, 2].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                        page.Cells[currentRow, 2].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                     }
 
                     // if Code Review Passed is yes then ...
                     if (item.GetValue(1, 9) != null)
                     if (item.GetValue(1, 9).ToString() != "")
-                    if (item.GetValue(1, 9).ToString() != "No")
-                        if (item.GetValue(1, 9).ToString() == "Yes" )
                     {
-                        // Color the Code Review Comments cell green
-                        page.Cells[currentRow, 9].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGreen);
+                        if (item.GetValue(1, 9).ToString() == "Yes" && item.GetValue(1, 8) != null)
+                        {
+                            // Color the Code Review Comments cell green
+                            page.Cells[currentRow, 9].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGreen);
+                        }
+                        else
+                        {
+                            // Color the Code Review Comments cell red
+                            page.Cells[currentRow, 9].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
+                        }
                     }
-                    else
-                    {
-                        // Color the Code Review Comments cell red
-                        page.Cells[currentRow, 9].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
-                    }
+                        else
+                        {
+                            // Color the Code Review Comments cell red
+                            page.Cells[currentRow, 9].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
+                        }
 
                     // if Code Review Comments is empty then ...
                     if (item.GetValue(1, 8) != null)
@@ -218,26 +226,32 @@ namespace Artifact_Tool
                     else
                     {
                         // Color the Code Review Comments cell red
-                        page.Cells[currentRow, 8].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                        page.Cells[currentRow, 8].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                     }
 
                     // if Unit Test Passed is yes then ...
                     if (item.GetValue(1, 21) != null)
                     if (item.GetValue(1, 21).ToString() != "")
-                    if (item.GetValue(1, 21).ToString() != "No")
-                        if (item.GetValue(1, 21).ToString() == "Yes" && item.GetValue(1, 22) != null)
                     {
-                        // Color the unit test cell green
-                        page.Cells[currentRow, 21].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGreen);
+                        if (item.GetValue(1, 21).ToString() == "Yes" && item.GetValue(1, 22) != null)
+                        {
+                            // Color the unit test cell green
+                            page.Cells[currentRow, 21].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGreen);
+                        }
+                        else
+                        {
+                            // Color the unit test cell red
+                            page.Cells[currentRow, 21].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
+                        }
                     }
                     else
                     {
                         // Color the unit test cell red
-                        page.Cells[currentRow, 21].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                        page.Cells[currentRow, 21].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                     }
 
 
-                    // if Unit Test Passed is no and Unit Test is empty then ...
+                    // if Unit Test is empty then ...
                     if (item.GetValue(1, 22) != null)
                     if (item.GetValue(1, 22).ToString() != "")
                     {
@@ -247,13 +261,13 @@ namespace Artifact_Tool
                     else
                     {
                         // Color the Unit Test cell red
-                        page.Cells[currentRow, 22].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.HotPink);
+                        page.Cells[currentRow, 22].Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightPink);
                     }
                 }
             }
             else
             {
-                row.Interior.Color = System.Drawing.Color.HotPink;
+                row.Interior.Color = System.Drawing.Color.LightPink;
             }
 
 
@@ -290,6 +304,51 @@ namespace Artifact_Tool
             string chosenFile = openFileDialog1.FileName;
             MessageBox.Show("Your file is " + chosenFile);
             Read_File(chosenFile);
+            MessageBox.Show("Excel sheet has been filtered successfully");
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutBox1 box = new AboutBox1();
+
+            box.Show();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string wordHelpFile = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "Artifact Filtering Tool.docx";
+
+                if (File.Exists(wordHelpFile))
+                {
+                    Process.Start(wordHelpFile);
+                }
+                else
+                {
+                    var thisAssembly = Assembly.GetExecutingAssembly();
+                    FileStream thisFile = new FileStream(wordHelpFile, FileMode.OpenOrCreate);
+
+                    using (Stream resFilestream = thisAssembly.GetManifestResourceStream("Artifact_Tool.Resources.Artifact Filtering Tool.docx"))
+                    {
+                        resFilestream.CopyTo(thisFile);
+                        thisFile.Close();
+                        Process.Start(wordHelpFile);
+                    }
+
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Error accessing resources!");
+            }
+
+
         }
     }
 }
